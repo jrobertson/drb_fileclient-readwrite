@@ -133,6 +133,14 @@ def DfsFile.glob(s)
   DRbFileClientReadWrite.new.glob(s)
 end
 
+def DfsFile.mkdir(filename)
+  DRbFileClientReadWrite.new.mkdir(filename)
+end
+
+def DfsFile.mkdir_p(filename)
+  DRbFileClientReadWrite.new.mkdir_p(filename)
+end
+
 def DfsFile.rm(filename)
   DRbFileClientReadWrite.new.rm(filename)
 end
