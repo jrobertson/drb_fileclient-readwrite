@@ -28,6 +28,21 @@ class DRbFileClientReadWrite < DRbFileClientReader
 
   end
 
+  def directory?(filename=@filename)
+
+    return File.directory? filename unless @directory or filename =~ /^dfs:\/\//
+
+    if filename =~ /^dfs:\/\// then
+      @file, filename2 = parse_path(filename)
+    else
+
+      filename2 = File.join(@directory, filename)
+    end
+
+    @file.directory?(filename2)
+
+  end
+
   def glob(s)
 
     if s =~ /^dfs:\/\// then
@@ -127,6 +142,10 @@ end
 
 def DfsFile.chdir(path)
   DRbFileClientReadWrite.new.chdir(path)
+end
+
+def DfsFile.directory?(filename)
+  DRbFileClient.new.directory?(filename)
 end
 
 def DfsFile.glob(s)
