@@ -78,6 +78,14 @@ class DRbFileClientReadWrite < DRbFileClientReader
     @file.mkdir_p filepath
   end
 
+  def pwd()
+
+    return Dir.pwd unless @directory
+
+    '/' + @directory if @file
+
+  end
+
   def rm(path)
 
     return FileUtils.rm path unless @directory or path =~ /^dfs:\/\//
@@ -158,6 +166,10 @@ end
 
 def DfsFile.mkdir_p(filename)
   DRbFileClientReadWrite.new.mkdir_p(filename)
+end
+
+def DfsFile.pwd()
+  DRbFileClient.new.pwd()
 end
 
 def DfsFile.rm(filename)

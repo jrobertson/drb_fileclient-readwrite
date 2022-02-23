@@ -1,7 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'drb_fileclient-readwrite'
-  s.version = '0.1.3'
-  s.summary = 'A DRb file reader and writer client to access the DRb_fileserver service.'
+  s.version = '0.1.4'
+  s.summary = 'A DRb file reader and writer client to access the ' +
+      'DRb_fileserver service.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/drb_fileclient-readwrite.rb']
   s.add_runtime_dependency('drb_fileclient-reader', '~> 0.1', '>=0.1.0')
