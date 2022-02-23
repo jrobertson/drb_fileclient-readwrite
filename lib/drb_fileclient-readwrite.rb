@@ -8,141 +8,152 @@ require 'drb_fileclient-reader'
 class DRbFileClientReadWrite < DRbFileClientReader
   using ColouredText
 
-  def chdir(raw_path)
+  def initialize()
+    @@directory ||= nil
+    @@file ||= nil
+  end
 
-    return Dir.chdir raw_path unless @directory or raw_path =~ /^dfs:\/\//
+  def chdir(raw_path)
+    puts 'inside chdir: ' + raw_path
+
+    return Dir.chdir raw_path unless @@directory or raw_path =~ /^dfs:\/\//
 
     if raw_path[0] == '/'  then
       directory = raw_path[1..-1]
     elsif raw_path =~ /^dfs:\/\//
-      @file, directory = parse_path(raw_path)
+      @@file, directory = parse_path(raw_path)
     else
-      directory = File.join(@directory, raw_path)
+      directory = File.join(@@directory, raw_path)
     end
 
-    if @file.exists? directory then
-      @directory = directory
+    if @@file.exists? directory then
+      @@directory = directory
+      puts '@@directory:' + @@directory.inspect
     else
       'No such file or directory'
     end
 
   end
 
-  def directory?(filename=@filename)
+  def directory?(filename=@@filename)
 
-    return File.directory? filename unless @directory or filename =~ /^dfs:\/\//
+    return File.directory? filename unless @@directory or filename =~ /^dfs:\/\//
 
     if filename =~ /^dfs:\/\// then
-      @file, filename2 = parse_path(filename)
+      @@file, filename2 = parse_path(filename)
     else
 
-      filename2 = File.join(@directory, filename)
+      filename2 = File.join(@@directory, filename)
     end
 
-    @file.directory?(filename2)
+    @@file.directory?(filename2)
 
   end
 
   def glob(s)
 
     if s =~ /^dfs:\/\// then
-      @file, s2 = parse_path(s)
+      @@file, s2 = parse_path(s)
     else
-      s2 = File.join(@directory, s)
+      s2 = File.join(@@directory, s)
     end
 
-    @file.glob s2
+    @@file.glob s2
 
   end
 
   def mkdir(name)
 
-    return FileUtils.mkdir name unless @directory or name =~ /^dfs:\/\//
+    return FileUtils.mkdir name unless @@directory or name =~ /^dfs:\/\//
 
-    @file, path = parse_path(name)
-    @file.mkdir path
+    @@file, path = parse_path(name)
+    @@file.mkdir path
   end
 
   def mkdir_p(raw_path)
 
-    unless @directory or raw_path =~ /^dfs:\/\// then
+    unless @@directory or raw_path =~ /^dfs:\/\// then
       return FileUtils.mkdir_p raw_path
     end
 
     if raw_path =~ /^dfs:\/\// then
-      @file, filepath = parse_path(raw_path)
+      @@file, filepath = parse_path(raw_path)
     else
-      filepath = File.join(@directory, raw_path)
+      filepath = File.join(@@directory, raw_path)
     end
 
-    @file.mkdir_p filepath
+    @@file.mkdir_p filepath
   end
 
   def pwd()
 
-    return Dir.pwd unless @directory
+    puts 'inside pwd'
+    puts '@@directory: ' + @@directory.inspect
+    puts '@@file: ' + @@file.inspect
 
-    '/' + @directory if @file
+    return Dir.pwd unless @@directory
+
+    '/' + @@directory if @@file
 
   end
 
   def rm(path)
 
-    return FileUtils.rm path unless @directory or path =~ /^dfs:\/\//
+    return FileUtils.rm path unless @@directory or path =~ /^dfs:\/\//
 
     if path =~ /^dfs:\/\// then
-      @file, path2 = parse_path( path)
+      @@file, path2 = parse_path( path)
     else
-      path2 = File.join(@directory, path)
+      path2 = File.join(@@directory, path)
     end
 
-    @file.rm  path2
+    @@file.rm  path2
 
   end
 
   def rm_r(path, force: false)
 
-    unless @directory or path =~ /^dfs:\/\// then
+    unless @@directory or path =~ /^dfs:\/\// then
       return FileUtils.rm_r(path, force: force)
     end
 
     if path =~ /^dfs:\/\// then
-      @file, path2 = parse_path( path)
+      @@file, path2 = parse_path( path)
     else
-      path2 = File.join(@directory, path)
+      path2 = File.join(@@directory, path)
     end
 
-    @file.rm_r(path2, force: force)
+    @@file.rm_r(path2, force: force)
 
   end
 
   def touch(s, mtime: Time.now)
 
-    unless @directory or s =~ /^dfs:\/\// then
+    unless @@directory or s =~ /^dfs:\/\// then
       return FileUtils.touch(s, mtime: mtime)
     end
 
     if s =~ /^dfs:\/\// then
-      @file, s2 = parse_path(s)
+      @@file, s2 = parse_path(s)
     else
-      s2 = File.join(@directory, s)
+      s2 = File.join(@@directory, s)
     end
 
-    @file.touch s2, mtime: mtime
+    @@file.touch s2, mtime: mtime
 
   end
 
-  def write(filename=@filename, s)
+  def write(filename=@@filename, s)
 
-    return File.write filename, s unless @directory or filename =~ /^dfs:\/\//
+    return File.write filename, s unless @@directory or filename =~ /^dfs:\/\//
 
     if filename =~ /^dfs:\/\// then
-      @file, path = parse_path(filename)
+      @@file, path = parse_path(filename)
     else
-      path = File.join(@directory, filename)
+      path = File.join(@@directory, filename)
     end
 
-    @file.write path, s
+    @@file.write path, s
 
   end
 
@@ -169,7 +180,7 @@ def DfsFile.mkdir_p(filename)
 end
 
 def DfsFile.pwd()
-  DRbFileClient.new.pwd()
+  DRbFileClientReadWrite.new.pwd()
 end
 
 def DfsFile.rm(filename)
