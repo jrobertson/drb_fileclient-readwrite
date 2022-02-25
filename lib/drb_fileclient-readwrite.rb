@@ -11,24 +11,23 @@ class DRbFileClientReadWrite < DRbFileClientReader
   def initialize()
     @@directory ||= nil
     @@file ||= nil
+    @@uri_prefix ||= nil
   end
 
   def chdir(raw_path)
-    puts 'inside chdir: ' + raw_path
 
     return Dir.chdir raw_path unless @@directory or raw_path =~ /^dfs:\/\//
 
     if raw_path[0] == '/'  then
       directory = raw_path[1..-1]
     elsif raw_path =~ /^dfs:\/\//
-      @@file, directory = parse_path(raw_path)
+      @@file, directory, @@uri_prefix = parse_path(raw_path)
     else
       directory = File.join(@@directory, raw_path)
     end
 
     if @@file.exists? directory then
       @@directory = directory
-      puts '@@directory:' + @@directory.inspect
     else
       'No such file or directory'
     end
@@ -62,12 +61,26 @@ class DRbFileClientReadWrite < DRbFileClientReader
 
   end
 
-  def mkdir(name)
+  def mkdir(raw_path)
 
-    return FileUtils.mkdir name unless @@directory or name =~ /^dfs:\/\//
+    unless @@directory or raw_path =~ /^dfs:\/\// then
+      return FileUtils.mkdir raw_path
+    end
 
-    @@file, path = parse_path(name)
-    @@file.mkdir path
+    if raw_path =~ /^dfs:\/\// then
+      @@file, filepath = parse_path(raw_path)
+    else
+
+      if @@uri_prefix then
+        @@file, filepath = parse_path(File.join(@@uri_prefix, @@directory,
+                                                raw_path))
+      else
+        filepath = File.join(@@directory, raw_path)
+      end
+
+    end
+
+    @@file.mkdir filepath
   end
 
   def mkdir_p(raw_path)
@@ -79,9 +92,17 @@ class DRbFileClientReadWrite < DRbFileClientReader
     if raw_path =~ /^dfs:\/\// then
       @@file, filepath = parse_path(raw_path)
     else
-      filepath = File.join(@@directory, raw_path)
+
+      if @@uri_prefix then
+        @@file, filepath = parse_path(File.join(@@uri_prefix, @@directory,
+                                                raw_path))
+      else
+        filepath = File.join(@@directory, raw_path)
+      end
+
     end
 
+    puts 'drb_fileclient-readwrite inside mkdir_p: ' + filepath.inspect
     @@file.mkdir_p filepath
   end
 
@@ -164,7 +185,7 @@ def DfsFile.chdir(path)
 end
 
 def DfsFile.directory?(filename)
-  DRbFileClient.new.directory?(filename)
+  DRbFileClientReadWrite.new.directory?(filename)
 end
 
 def DfsFile.glob(s)
