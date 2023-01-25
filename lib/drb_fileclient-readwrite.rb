@@ -26,7 +26,7 @@ class DRbFileClientReadWrite < DRbFileClientReader
       directory = File.join(@@directory, raw_path)
     end
 
-    if @@file.exists? directory then
+    if @@file.exist? directory then
       @@directory = directory
     else
       'No such file or directory'
@@ -60,13 +60,13 @@ class DRbFileClientReadWrite < DRbFileClientReader
     @@file.glob s2
 
   end
-
+  
   def mkdir(raw_path)
-
+    
     unless @@directory or raw_path =~ /^dfs:\/\// then
       return FileUtils.mkdir raw_path
     end
-
+    
     if raw_path =~ /^dfs:\/\// then
       @@file, filepath = parse_path(raw_path)
     else
@@ -82,13 +82,13 @@ class DRbFileClientReadWrite < DRbFileClientReader
 
     @@file.mkdir filepath
   end
-
+  
   def mkdir_p(raw_path)
-
+    
     unless @@directory or raw_path =~ /^dfs:\/\// then
-      return FileUtils.mkdir_p raw_path
-    end
-
+      return FileUtils.mkdir_p raw_path 
+    end    
+    
     if raw_path =~ /^dfs:\/\// then
       @@file, filepath = parse_path(raw_path)
     else
@@ -101,7 +101,7 @@ class DRbFileClientReadWrite < DRbFileClientReader
       end
 
     end
-
+    
     puts 'drb_fileclient-readwrite inside mkdir_p: ' + filepath.inspect
     @@file.mkdir_p filepath
   end
@@ -117,20 +117,20 @@ class DRbFileClientReadWrite < DRbFileClientReader
     '/' + @@directory if @@file
 
   end
-
+  
   def rm(path)
-
+    
     return FileUtils.rm path unless @@directory or path =~ /^dfs:\/\//
-
+    
     if path =~ /^dfs:\/\// then
       @@file, path2 = parse_path( path)
     else
       path2 = File.join(@@directory, path)
     end
-
+      
     @@file.rm  path2
-
-  end
+    
+  end    
 
   def rm_r(path, force: false)
 
@@ -163,22 +163,22 @@ class DRbFileClientReadWrite < DRbFileClientReader
     @@file.touch s2, mtime: mtime
 
   end
-
+  
   def write(filename=@@filename, s)
-
+        
     return File.write filename, s unless @@directory or filename =~ /^dfs:\/\//
-
+    
     if filename =~ /^dfs:\/\// then
       @@file, path = parse_path(filename)
     else
       path = File.join(@@directory, filename)
     end
-
+    
     @@file.write path, s
-
+    
   end
 
-end
+end 
 
 def DfsFile.chdir(path)
   DRbFileClientReadWrite.new.chdir(path)
@@ -187,7 +187,7 @@ end
 def DfsFile.directory?(filename)
   DRbFileClientReadWrite.new.directory?(filename)
 end
-
+  
 def DfsFile.glob(s)
   DRbFileClientReadWrite.new.glob(s)
 end

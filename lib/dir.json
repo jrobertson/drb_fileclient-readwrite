@@ -1,0 +1,29 @@
+{
+  "directory": {
+    "summary": {
+      "schema": "directory[title, file_path,  last_modified, description]/file(name, type, ext, mtime, description)",
+      "recordx_type": "dynarex",
+      "default_key": "name",
+      "title": "Index of /home/james/gem_src/drb_fileclient-readwrite/lib",
+      "file_path": "/home/james/gem_src/drb_fileclient-readwrite/lib",
+      "last_modified": "2022-03-06 12:20:48 +0000",
+      "description": null
+    },
+    "records": [
+      {
+        "file": {
+          "id": "1",
+          "created": "2022-03-06 12:20:48 +0000",
+          "last_modified": null,
+          "body": {
+            "name": "drb_fileclient-readwrite.rb",
+            "type": "file",
+            "ext": ".rb",
+            "mtime": "2022-02-25 09:38:06 +0000",
+            "description": ""
+          }
+        }
+      }
+    ]
+  }
+}
